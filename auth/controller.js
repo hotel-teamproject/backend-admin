@@ -1,103 +1,151 @@
-// auth/controller.js
 const authService = require('./service');
-const { sendSuccess } = require('../shared/utils/response'); // 파일 이름 다르면 맞게 수정
+const { successResponse, errorResponse } = require('../shared/utils/response');
+const { HTTP_STATUS, MESSAGES } = require('../shared/utils/constants');
 
-// 회원가입
-async function register(req, res, next) {
+/**
+ * 로그인 컨트롤러
+ */
+exports.login = async (req, res, next) => {
     try {
-        const result = await authService.register(req.body);
-        // 표준 응답 유틸이 있으면 사용
-        if (sendSuccess) {
-            return sendSuccess(res, 201, '회원가입이 완료되었습니다.', result);
-        }
-        // 없으면 직접 응답
-        res.status(201).json({
-            success: true,
-            statusCode: 201,
-            message: '회원가입이 완료되었습니다.',
-            data: result,
-        });
-    } catch (err) {
-        next(err);
-    }
-}
+        const { email, password } = req.body;
 
-// 로그인
-async function login(req, res, next) {
+        // 입력 값 검증
+        if (!email || !password) {
+            return res
+                .status(HTTP_STATUS.BAD_REQUEST)
+                .json(
+                    errorResponse(
+                        MESSAGES.VALIDATION.INVALID_INPUT,
+                        null,
+                        HTTP_STATUS.BAD_REQUEST
+                    )
+                );
+        }
+
+        const result = await authService.login(email, password);
+
+        res.cookie('token', result.token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
+        });
+
+        res.json(
+            successResponse(MESSAGES.AUTH.LOGIN_SUCCESS, result, HTTP_STATUS.OK)
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * 회원가입 컨트롤러
+ */
+exports.register = async (req, res, next) => {
     try {
-        const result = await authService.login(req.body);
-        if (sendSuccess) {
-            return sendSuccess(res, 200, '로그인에 성공했습니다.', result);
-        }
-        res.status(200).json({
-            success: true,
-            statusCode: 200,
-            message: '로그인에 성공했습니다.',
-            data: result,
-        });
-    } catch (err) {
-        next(err);
-    }
-}
+        const { email, password, name } = req.body;
 
-// 로그아웃 (토큰 무효화 방식에 따라 구현)
-async function logout(req, res, next) {
+        // 입력 값 검증
+        if (!email || !password || !name) {
+            return res
+                .status(HTTP_STATUS.BAD_REQUEST)
+                .json(
+                    errorResponse(
+                        MESSAGES.VALIDATION.INVALID_INPUT,
+                        null,
+                        HTTP_STATUS.BAD_REQUEST
+                    )
+                );
+        }
+
+        const result = await authService.register(email, password, name);
+
+        res.cookie('token', result.token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        res
+            .status(HTTP_STATUS.CREATED)
+            .json(
+                successResponse(
+                    MESSAGES.AUTH.REGISTER_SUCCESS,
+                    result,
+                    HTTP_STATUS.CREATED
+                )
+            );
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * 로그아웃 컨트롤러
+ */
+exports.logout = async (req, res, next) => {
     try {
-        await authService.logout(req.user);
-        if (sendSuccess) {
-            return sendSuccess(res, 200, '로그아웃되었습니다.');
-        }
-        res.status(200).json({
-            success: true,
-            statusCode: 200,
-            message: '로그아웃되었습니다.',
-            data: null,
-        });
-    } catch (err) {
-        next(err);
+        res.clearCookie('token');
+        res.json(
+            successResponse(MESSAGES.AUTH.LOGOUT_SUCCESS, null, HTTP_STATUS.OK)
+        );
+    } catch (error) {
+        next(error);
     }
-}
+};
 
-// 프로필 조회
-async function profile(req, res, next) {
+/**
+ * 프로필 조회 컨트롤러
+ */
+exports.getProfile = async (req, res, next) => {
     try {
-        const result = await authService.getProfile(req.user);
-        if (sendSuccess) {
-            return sendSuccess(res, 200, '프로필 조회에 성공했습니다.', result);
-        }
-        res.status(200).json({
-            success: true,
-            statusCode: 200,
-            message: '프로필 조회에 성공했습니다.',
-            data: result,
-        });
-    } catch (err) {
-        next(err);
+        const user = await authService.getProfile(req.userId);
+        res.json(successResponse('프로필 조회 성공', user, HTTP_STATUS.OK));
+    } catch (error) {
+        next(error);
     }
-}
+};
 
-// 비밀번호 변경
-async function changePassword(req, res, next) {
+/**
+ * 프로필 수정 컨트롤러
+ */
+exports.updateProfile = async (req, res, next) => {
     try {
-        await authService.changePassword(req.user, req.body);
-        if (sendSuccess) {
-            return sendSuccess(res, 200, '비밀번호가 변경되었습니다.');
-        }
-        res.status(200).json({
-            success: true,
-            statusCode: 200,
-            message: '비밀번호가 변경되었습니다.',
-            data: null,
-        });
-    } catch (err) {
-        next(err);
+        const { name, avatar } = req.body;
+        const user = await authService.updateProfile(req.userId, { name, avatar });
+        res.json(successResponse('프로필 수정 완료', user, HTTP_STATUS.OK));
+    } catch (error) {
+        next(error);
     }
-}
+};
 
-module.exports = {
-    register,
-    login,
-    logout,
-    profile,
-    changePassword,
+/**
+ * 비밀번호 변경 컨트롤러
+ */
+exports.changePassword = async (req, res, next) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+
+        if (!oldPassword || !newPassword) {
+            return res
+                .status(HTTP_STATUS.BAD_REQUEST)
+                .json(
+                    errorResponse(
+                        MESSAGES.VALIDATION.INVALID_INPUT,
+                        null,
+                        HTTP_STATUS.BAD_REQUEST
+                    )
+                );
+        }
+
+        const result = await authService.changePassword(
+            req.userId,
+            oldPassword,
+            newPassword
+        );
+
+        res.json(successResponse(result.message, null, HTTP_STATUS.OK));
+    } catch (error) {
+        next(error);
+    }
 };

@@ -1,21 +1,15 @@
 const express = require('express');
-const authController = require('./controller');
+const router = express.Router();
+const controller = require('./controller');
 const { verifyToken } = require('../shared/middleware/authMiddleware');
 
-const router = express.Router();
+// Public
+router.post('/register', controller.register);
+router.post('/login', controller.login);
 
-/**
- * 인증 라우트
- */
-
-// 인증 필요 없음
-router.post('/login', authController.login);
-router.post('/register', authController.register);
-
-// 인증 필요
-router.post('/logout', verifyToken, authController.logout);
-router.get('/profile', verifyToken, authController.getProfile);
-router.put('/profile', verifyToken, authController.updateProfile);
-router.post('/change-password', verifyToken, authController.changePassword);
+// Protected
+router.post('/logout', verifyToken, controller.logout);
+router.get('/profile', verifyToken, controller.profile);
+router.post('/change-password', verifyToken, controller.changePassword);
 
 module.exports = router;

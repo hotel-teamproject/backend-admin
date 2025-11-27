@@ -1,59 +1,44 @@
 require('dotenv').config();
 
-const express = require("express");
-const cors = require("cors");
-const cookieParser = require('cookie-parser');
-const mongoose = require("mongoose");
+const app = require('./app');
 
+const PORT = process.env.PORT || 3000;
 
-// authRoutes
-const authRoutes = require("./routes/authroutes")
-const uploadRoutes = require('./routes/upload')
-const postRoutes = require('./routes/posts')
-const adminRoutes = require('./routes/admin')
-
-
-
-const app = express();
-const PORT = process.env.PORT || 3000
-
-
-app.use(cors({
-    origin: process.env.FRONT_ORIGIN,              // 변경됨: .env 기반 오리진 설정
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // 추가됨: 허용 메서드 명시
-    allowedHeaders: ['Content-Type', 'Authorization'] // 추가됨: 허용 헤더 명시
-}));
-
-app.use(express.json({ limit: "2mb" }));
-app.use(cookieParser());
-
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log("MongoDB 연결 성공"))
-    .catch((err) => console.error("MongoDB 연결 실패:", err.message));
-
-
-app.get("/", (_req, res) => res.send("PhotoMemo API OK"));
-
-
-app.use("/api/auth", authRoutes)
-app.use("/api/posts", postRoutes)
-app.use("/api/upload", uploadRoutes)
-app.use("/api/admin", adminRoutes)
-
-
-
-// ── 404
-app.use((req, res, next) => {                    // 추가됨: 없는 경로 처리
-    res.status(404).json({ message: '요청하신 경로를 찾을 수 없습니다.' });
+const server = app.listen(PORT, () => {
+    console.log(`
+╔════════════════════════════════════════╗
+║  🚀 Backend Server Started             ║
+║  Environment: ${(process.env.NODE_ENV || 'development').padEnd(26)}║
+║  Port: ${String(PORT).padEnd(33)}║
+║  URL: http://localhost:${String(PORT).padEnd(28)}║
+╚════════════════════════════════════════╝
+    `);
 });
 
-// ── error handler
-app.use((err, req, res, next) => {               // 추가됨: 전역 에러 핸들러
-    console.error('Unhandled Error:', err);
-    res.status(500).json({ message: '서버 오류', error: err?.message || String(err) });
+// Graceful Shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received. Shutting down gracefully...');
+    server.close(() => {
+        console.log('Server closed');
+        process.exit(0);
+    });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running: http://localhost:${PORT}`); // 동일
+process.on('SIGINT', () => {
+    console.log('SIGINT received. Shutting down gracefully...');
+    server.close(() => {
+        console.log('Server closed');
+        process.exit(0);
+    });
+});
+
+// 미처리 예외 처리
+process.on('uncaughtException', (error) => {
+    console.error('Uncaught Exception:', error);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    process.exit(1);
 });

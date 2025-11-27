@@ -134,7 +134,7 @@ exports.changePassword = async (userId, oldPassword, newPassword) => {
 
         const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
         if (!isPasswordMatch) {
-            const error = new Error('기존 비밀번호가 일치하지 않습니다');
+            const error = new Error('비밀번호가 일치하지 않습니다');
             error.statusCode = 401;
             throw error;
         }

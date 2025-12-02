@@ -1,25 +1,22 @@
-const Hotel = require('./model');
+const Hotel = require('../models/Hotel');
 
-async function createHotel(payload) {
-	const h = new Hotel(payload);
-	await h.save();
-	return h.toObject();
-}
+exports.createHotel = async (data) => {
+    const hotel = new Hotel(data);
+    return await hotel.save();
+};
 
-async function getHotelById(id) {
-	return Hotel.findById(id).lean().exec();
-}
+exports.listHotels = async () => {
+    return await Hotel.find().sort({ createdAt: -1 });
+};
 
-async function listHotels({ page = 1, limit = 20 } = {}) {
-	const skip = (Math.max(page, 1) - 1) * limit;
-	const docs = await Hotel.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit).lean().exec();
-	const total = await Hotel.countDocuments({}).exec();
-	return { docs, total, page: Number(page), limit: Number(limit) };
-}
+exports.getHotelById = async (id) => {
+    return await Hotel.findById(id);
+};
 
-async function updateHotel(id, patch) {
-	const updated = await Hotel.findByIdAndUpdate(id, patch, { new: true }).lean().exec();
-	return updated;
-}
+exports.updateHotel = async (id, data) => {
+    return await Hotel.findByIdAndUpdate(id, data, { new: true });
+};
 
-module.exports = { createHotel, getHotelById, listHotels, updateHotel };
+exports.deleteHotel = async (id) => {
+    return await Hotel.findByIdAndDelete(id);
+};

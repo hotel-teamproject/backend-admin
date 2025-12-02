@@ -48,6 +48,12 @@ const seedData = async () => {
             password: hashedPassword,
             role: 'user',
         });
+        const user3 = await User.create({
+            name: '조용준',
+            email: 'user3@test.com',
+            password: hashedPassword,
+            role: 'user',
+        });
         
         await User.create({
             name: '총관리자',

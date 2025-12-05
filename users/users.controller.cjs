@@ -1,9 +1,10 @@
 // 중요: '../models/User'는 models 폴더 안의 User.js를 가져오라는 뜻입니다.
 const User = require('../models/User.cjs');
 
+// 사용자분(HEAD)이 만드신 유틸리티와 고급 로직을 유지합니다.
 const { successResponse, errorResponse } = require('../shared/utils/response.cjs');
 
-// 모든 회원 목록 가져오기
+// 모든 회원 목록 가져오기 (검색, 필터, 페이징 기능 포함)
 exports.getAllUsers = async (req, res) => {
     try {
         const { page = 1, limit = 20, search, role, status } = req.query;
@@ -30,7 +31,7 @@ exports.getAllUsers = async (req, res) => {
 
         const skip = (parseInt(page) - 1) * parseInt(limit);
         const users = await User.find(query)
-            .select('-password') // 비밀번호 제외
+            .select('-password') // 🔐 보안: 비밀번호 필드는 제외하고 가져옵니다.
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(parseInt(limit))

@@ -1,4 +1,4 @@
-const User = require('../models/User.cjs');
+const User = require('../models/User.cjs'); // ⬅️ .cjs 확인!
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -49,7 +49,7 @@ exports.login = async (req, res) => {
             { expiresIn: '1d' }
         );
 
-        // 쿠키에도 토큰 저장 (httpOnly로 보안 강화)
+        // 쿠키에도 토큰 저장 (httpOnly로 보안 강화) - 사용자 작업분 유지
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -67,7 +67,7 @@ exports.login = async (req, res) => {
     }
 };
 
-// 3. 로그아웃
+// 3. 로그아웃 - 사용자 작업분 유지
 exports.logout = async (req, res) => {
     try {
         // 쿠키 삭제

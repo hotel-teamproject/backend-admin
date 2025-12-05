@@ -1,4 +1,7 @@
-const Coupon = require('./model.cjs'); // coupon 폴더의 모델 사용
+// 🔴 [수정] 팀 프로젝트의 모델 경로 규칙을 따릅니다.
+const Coupon = require('../models/Coupon.cjs'); 
+// 사용자분이 만드신 응답 유틸리티는 유지합니다.
+const { successResponse, errorResponse } = require('../shared/utils/response.cjs');
 
 // 1. 쿠폰 생성하기 (관리자용)
 exports.createCoupon = async (req, res) => {
@@ -11,9 +14,7 @@ exports.createCoupon = async (req, res) => {
     }
 };
 
-const { successResponse, errorResponse } = require('../shared/utils/response.cjs');
-
-// 2. 모든 쿠폰 목록 조회
+// 2. 모든 쿠폰 목록 조회 (페이지네이션 & 검색 기능 유지)
 exports.getCoupons = async (req, res) => {
     try {
         const { page = 1, limit = 20, search, active } = req.query;

@@ -10,11 +10,13 @@ const { corsOptions } = require('./shared/config/cors.cjs');
 const { errorHandler, notFoundHandler } = require('./shared/middleware/errorHandler.cjs');
 
 // 2. 도메인 라우트 불러오기
+// 🔴 [중요] 모든 경로 뒤에 .cjs를 꼭 붙여야 합니다! (팀 규칙 준수)
 const authRoutes = require('./auth/routes.cjs');
 const usersRoutes = require('./users/users.routes.cjs');
 const reservationRoutes = require('./reservation/reservation.routes.cjs');
 const hotelRoutes = require('./hotel/hotel.routes.cjs');
 const couponRoutes = require('./coupon/coupon.routes.cjs');
+// [유지] 사용자(HEAD)의 추가 기능 (리뷰, 대시보드)
 const reviewRoutes = require('./review/review.routes.cjs');
 const dashboardRoutes = require('./dashboard/routes.cjs');
 
@@ -36,30 +38,16 @@ app.get('/', (req, res) => {
     res.json({ message: 'Backend Server is Running!', timestamp: new Date() });
 });
 
-// 4. API 라우트 등록 (▼ 여기가 수정되었습니다!)
-// 프론트엔드가 요청하는 주소(/admin/...)에 맞춰서 경로를 매핑해줍니다.
+// 4. API 라우트 등록
+app.use('/api/auth', authRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/reservation', reservationRoutes);
+app.use('/api/hotel', hotelRoutes);
+app.use('/api/coupon', couponRoutes);
 
-app.use('/api/auth', authRoutes); // 로그인은 그대로 둠
-
-// [수정] 호텔 관리 주소 변경 (/api/hotel -> /api/admin/hotels)
-app.use('/api/admin/hotels', hotelRoutes); 
-
-// [수정] 회원 관리 주소 변경 (/api/users -> /api/admin/users)
-app.use('/api/admin/users', usersRoutes);
-
-// [수정] 예약 관리 주소 변경 (/api/reservation -> /api/admin/bookings)
-// 주의: 프론트엔드는 bookings라고 부르고 백엔드 파일은 reservation입니다. 매핑을 맞춰줍니다.
-app.use('/api/admin/bookings', reservationRoutes);
-
-// [수정] 쿠폰 관리 주소 변경 (/api/coupon -> /api/admin/coupons)
-app.use('/api/admin/coupons', couponRoutes);
-
-// 리뷰 관리
-app.use('/api/admin/reviews', reviewRoutes);
-
-// 대시보드 (주소 확인 필요, 일단 유지)
+// [추가] 임포트한 라우트 등록 (이 부분이 없으면 404 에러가 납니다)
+app.use('/api/review', reviewRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-
 
 // 에러 핸들러
 app.use(notFoundHandler);

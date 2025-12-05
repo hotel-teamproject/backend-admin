@@ -1,19 +1,22 @@
 // models 폴더에 있는 Hotel 모델을 가져옵니다.
 const Hotel = require('../models/Hotel.cjs');
 
+// 공통 응답 유틸리티 가져오기 (HEAD에서 추가된 부분)
+const { successResponse, errorResponse } = require('../shared/utils/response.cjs');
+
 // 1. 호텔(객실) 등록하기 (Create)
 exports.createHotel = async (req, res) => {
     try {
         const newHotel = await Hotel.create(req.body);
+        // create는 충돌이 없었으므로 기존 로직 유지하되, 일관성을 위해 successResponse를 적용해도 좋습니다.
+        // 현재는 충돌나지 않은 원래 코드 그대로 둡니다.
         res.status(201).json({ success: true, data: newHotel });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
 };
 
-const { successResponse, errorResponse } = require('../shared/utils/response.cjs');
-
-// 2. 전체 목록 조회하기 (Read List)
+// 2. 전체 목록 조회하기 (Read List) - 검색, 페이지네이션 기능 유지
 exports.getHotels = async (req, res) => {
     try {
         const { page = 1, limit = 20, search, status } = req.query;
@@ -55,7 +58,7 @@ exports.getHotels = async (req, res) => {
     }
 };
 
-// 3. 특정 호텔 상세 조회 (Read One)
+// 3. 특정 호텔 상세 조회 (Read One) - 상세 조회 및 에러 처리 강화 유지
 exports.getHotelById = async (req, res) => {
     try {
         const hotel = await Hotel.findById(req.params.id).lean();
@@ -69,7 +72,7 @@ exports.getHotelById = async (req, res) => {
     }
 };
 
-// 4. 정보 수정하기 (Update)
+// 4. 정보 수정하기 (Update) - 에러 처리 강화 유지
 exports.updateHotel = async (req, res) => {
     try {
         const updatedHotel = await Hotel.findByIdAndUpdate(
@@ -87,7 +90,7 @@ exports.updateHotel = async (req, res) => {
     }
 };
 
-// 5. 삭제하기 (Delete)
+// 5. 삭제하기 (Delete) - 에러 처리 강화 유지
 exports.deleteHotel = async (req, res) => {
     try {
         const deletedHotel = await Hotel.findByIdAndDelete(req.params.id);

@@ -1,5 +1,5 @@
-const { errorResponse } = require('../utils/response');
-const { HTTP_STATUS, MESSAGES, USER_ROLES } = require('../utils/constants');
+const { errorResponse } = require('../utils/response.cjs');
+const { HTTP_STATUS, MESSAGES, USER_ROLES } = require('../utils/constants.cjs');
 
 /**
  * 역할 기반 접근 제어 미들웨어

@@ -1,4 +1,4 @@
-const Notice = require('./model');
+const Notice = require('./model.cjs');
 
 async function createNotice(payload) {
   const n = new Notice(payload);

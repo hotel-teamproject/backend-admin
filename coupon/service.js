@@ -1,4 +1,4 @@
-const Coupon = require('./model');
+const Coupon = require('./model.cjs');
 
 async function createCoupon(payload) {
     const c = new Coupon(payload);

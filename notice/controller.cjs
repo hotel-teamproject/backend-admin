@@ -53,3 +53,4 @@ async function remove(req, res) {
 }
 
 module.exports = { create, list, getById, update, remove };
+

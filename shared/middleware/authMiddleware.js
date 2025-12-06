@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
-const { errorResponse } = require('../utils/response');
-const { HTTP_STATUS, MESSAGES } = require('../utils/constants');
+const { errorResponse } = require('../utils/response.cjs');
+const { HTTP_STATUS, MESSAGES } = require('../utils/constants.cjs');
 
 /**
  * JWT 토큰 검증 미들웨어

@@ -23,7 +23,7 @@ router.use('/models', modelsRoutes);
 const middlewaresRoutes = require('../middlewares/route');
 router.use('/middlewares', middlewaresRoutes);
 
-const noticeRoutes = require('../notice/route');
+const noticeRoutes = require('../notice/route.cjs');
 router.use('/notices', noticeRoutes);
 
 // (__debug_routes 부분 필요하면 여기 밑에 그대로 두기)

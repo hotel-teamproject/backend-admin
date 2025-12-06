@@ -1,4 +1,4 @@
-const service = require('./service');
+const service = require('./service.cjs');
 
 async function overview(req, res) {
   return service.getOverview(req, res);

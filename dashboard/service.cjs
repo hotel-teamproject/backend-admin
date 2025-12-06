@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { successResponse, errorResponse } = require('../shared/utils/response');
+const { successResponse, errorResponse } = require('../shared/utils/response.cjs');
 
 function getCollection(name) {
   try {

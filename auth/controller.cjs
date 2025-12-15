@@ -1,14 +1,15 @@
-const User = require('../models/User.cjs'); // ⬅️ .cjs 확인!
+const User = require('../models/User.cjs');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 // 1. 회원가입
-exports.register = async (req, res) => {
+exports.register = async (req, res, next) => { // 🟢 next 추가
     try {
         const { email, password, name, role } = req.body;
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
+            // 명시적인 중복 검사는 여기서 400 리턴 (또는 에러로 던져도 됨)
             return res.status(400).json({ message: '이미 가입된 이메일입니다.' });
         }
 
@@ -24,12 +25,14 @@ exports.register = async (req, res) => {
 
         res.status(201).json({ success: true, data: newUser });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        // 🟢 여기가 핵심! 에러를 전역 핸들러로 넘깁니다.
+        // 유효성 검사 실패 시 errorHandler가 알아서 400으로 응답해줍니다.
+        next(error);
     }
 };
 
 // 2. 로그인
-exports.login = async (req, res) => {
+exports.login = async (req, res, next) => { // 🟢 next 추가
     try {
         const { email, password } = req.body;
 
@@ -49,7 +52,7 @@ exports.login = async (req, res) => {
             { expiresIn: '1d' }
         );
 
-        // 쿠키에도 토큰 저장 (httpOnly로 보안 강화) - 사용자 작업분 유지
+        // 쿠키에도 토큰 저장 (httpOnly로 보안 강화)
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -63,12 +66,13 @@ exports.login = async (req, res) => {
             user: { id: user._id, name: user.name, email: user.email, role: user.role }
         });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        // 🟢 에러를 전역 핸들러로 위임
+        next(error);
     }
 };
 
-// 3. 로그아웃 - 사용자 작업분 유지
-exports.logout = async (req, res) => {
+// 3. 로그아웃
+exports.logout = async (req, res, next) => { // 🟢 next 추가
     try {
         // 쿠키 삭제
         res.clearCookie('token', {
@@ -82,6 +86,7 @@ exports.logout = async (req, res) => {
             message: '로그아웃 되었습니다.' 
         });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        // 🟢 에러를 전역 핸들러로 위임
+        next(error);
     }
 };

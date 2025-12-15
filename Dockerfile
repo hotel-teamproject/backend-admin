@@ -7,6 +7,7 @@ RUN npm install --production
 
 COPY . .
 
-EXPOSE 3000
+EXPOSE 4000
 
-CMD ["node", "app.js"]
+
+CMD ["node", "server.cjs"] 

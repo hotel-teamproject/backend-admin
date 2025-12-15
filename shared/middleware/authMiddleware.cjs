@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+// 불러오는 파일들도 .cjs로 명확하게 지정
 const { errorResponse } = require('../utils/response.cjs');
 const { HTTP_STATUS, MESSAGES } = require('../utils/constants.cjs');
 
@@ -20,7 +21,7 @@ exports.verifyToken = (req, res, next) => {
         req.userRole = decoded.role;
         next();
     } catch (error) {
-        res.status(HTTP_STATUS.UNAUTHORIZED).json(
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json(
             errorResponse(MESSAGES.AUTH.TOKEN_EXPIRED, error.message, HTTP_STATUS.UNAUTHORIZED)
         );
     }
@@ -45,7 +46,7 @@ exports.refreshToken = (req, res, next) => {
         req.userId = decoded.id;
         next();
     } catch (error) {
-        res.status(HTTP_STATUS.UNAUTHORIZED).json(
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json(
             errorResponse(MESSAGES.AUTH.TOKEN_EXPIRED, error.message, HTTP_STATUS.UNAUTHORIZED)
         );
     }

@@ -62,14 +62,27 @@ exports.getReviewById = async (req, res) => {
     }
 };
 
-// 리뷰 삭제
+// [수정됨] 리뷰 삭제 (안전성 강화)
 exports.deleteReview = async (req, res) => {
     try {
-        await Review.findByIdAndDelete(req.params.id);
-        return res.json(successResponse('리뷰 삭제 성공', null));
+        const reviewId = req.params.id;
+        console.log(`[삭제 요청] 리뷰 ID: ${reviewId}`); // 서버 로그 확인용
+
+        // 삭제 시도 및 결과 확인
+        const deletedReview = await Review.findByIdAndDelete(reviewId);
+
+        // 삭제할 리뷰가 DB에 없었던 경우
+        if (!deletedReview) {
+            console.warn(`[삭제 실패] 존재하지 않는 리뷰 ID: ${reviewId}`);
+            return res.status(404).json(errorResponse('이미 삭제되었거나 존재하지 않는 리뷰입니다.', null, 404));
+        }
+
+        console.log(`[삭제 성공] 리뷰 ID: ${reviewId}`);
+        return res.json(successResponse('리뷰 삭제 성공', { id: reviewId }));
+
     } catch (error) {
-        console.error('review.deleteReview error', error);
-        return res.status(500).json(errorResponse('리뷰 삭제 실패', error, 500));
+        console.error('review.deleteReview error:', error);
+        return res.status(500).json(errorResponse('서버 오류로 리뷰 삭제 실패', error, 500));
     }
 };
 
@@ -115,4 +128,3 @@ exports.handleReport = async (req, res) => {
         return res.status(500).json(errorResponse('신고 처리 실패', error, 500));
     }
 };
-

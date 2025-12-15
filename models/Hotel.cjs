@@ -4,16 +4,24 @@ const hotelSchema = new mongoose.Schema({
     name: { type: String, required: true },
     address: { type: String, required: true },
     description: String,
-    // 객실 정보 배열
+    phone: String, // 🟢 추가
+    email: String, // 🟢 추가
+    rating: { type: Number, default: 0 }, // 🟢 추가
+    price: { type: Number, required: true }, // 🟢 추가
+    status: { 
+        type: String, 
+        enum: ['pending', 'approved', 'rejected', 'active', 'inactive'],
+        default: 'pending' 
+    }, // 🟢 추가
     rooms: [
         { 
-            roomType: { type: String, required: true }, // 예: Standard, Deluxe
+            roomType: { type: String, required: true },
             price: { type: Number, required: true },
             capacity: { type: Number, default: 2 },
-            count: { type: Number, default: 1 } // 보유 객실 수
+            count: { type: Number, default: 1 }
         }
     ],
-    images: [String], // 이미지 URL들
+    images: [String],
     isActive: { type: Boolean, default: true }
 }, { timestamps: true });
 
